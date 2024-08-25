@@ -6,10 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -20,8 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-
-    private val currentTime = MutableLiveData<Long>(0L)
+    private val currentTime = MutableLiveData(0L)
     private var timerStartedAt = 0L
     private var timerRunning = false
 
@@ -30,20 +26,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ComposePlaygroundTheme {
-                Scaffold(modifier = Modifier.fillMaxHeight()) { innerPadding ->
-                    StopWatch(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .clickable { toggle() },
-                        currentTime = currentTime,
-                    )
-                }
+                ActivityView()
             }
         }
     }
 
     private fun toggle() {
-        println("Toggle")
         if (timerRunning) stopTimer()
         else startTimer()
     }
@@ -63,5 +51,21 @@ class MainActivity : ComponentActivity() {
         currentTime.value = 0
         timerRunning = false
         timerStartedAt = 0
+    }
+
+    @Composable
+    fun ActivityView() {
+        Box {
+            StopWatch(
+                modifier = Modifier.clickable { toggle() },
+                currentTime = currentTime,
+            )
+        }
+    }
+
+    @Preview
+    @Composable
+    fun PreviewActivity(modifier: Modifier = Modifier) {
+        ActivityView()
     }
 }

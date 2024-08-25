@@ -1,14 +1,11 @@
 package com.bhandari.composeplayground
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -39,24 +36,33 @@ import com.bhandari.composeplayground.ui.theme.ComposePlaygroundTheme
 import kotlin.math.cos
 import kotlin.math.sin
 
-enum class Colors constructor(val value: Color) {
+enum class Colors(val value: Color) {
     YELLOW(Color(android.graphics.Color.parseColor("#ffa00c"))),
     BLACK(Color(android.graphics.Color.parseColor("#000000"))),
     WHITE(Color(android.graphics.Color.parseColor("#ffffff"))),
     GRAY(Color(android.graphics.Color.parseColor("#464449"))),
 }
 
+const val NOTCH_COUNT = 252
+const val PRIMARY_NOTCH_LENGTH = 40F
+const val SECONDARY_NOTCH_LENGTH = 25F
+
+val PRIMARY_NOTCH_COLOR = Colors.WHITE.value
+val SECONDARY_NOTCH_COLOR = Colors.GRAY.value
+
+const val ROTATING_HAND_WIDTH = 14f
+const val ROTATING_HAND_EXTENSION = 100f
+
 @Composable
 fun StopWatch(
     modifier: Modifier = Modifier,
     currentTime: MutableLiveData<Long>,
 ) {
-    val currentTimeLocal by currentTime.observeAsState(0L)
+    val currentTimeState by currentTime.observeAsState(0L)
 
     var circleRadius by remember {
         mutableFloatStateOf(0f)
     }
-
     var centerX by remember {
         mutableFloatStateOf(0f)
     }
@@ -64,23 +70,8 @@ fun StopWatch(
         mutableFloatStateOf(0f)
     }
 
-    val circlePerimeterAngle by remember {
-        mutableFloatStateOf(0f)
-    }
-
     val textMeasure = rememberTextMeasurer()
-
-    val notchCount = 252
-    val hourInterval = notchCount / 12
-
-    val hourLength = 40f
-    val minuteLength = 25f
-
-    val hourColor = Colors.WHITE.value
-    val minuteColor = Colors.GRAY.value
-
-    val rotatingHandWidth = 10f
-    val rotatingHandExtension = 100f
+    val hourInterval = NOTCH_COUNT / 12
 
     Canvas(
         modifier = modifier
@@ -95,43 +86,43 @@ fun StopWatch(
             }
     ) {
         //notches on boundary of circle
-        repeat(notchCount) { notchNumber ->
-            val circlePerimeterAngleLocal =
-                circlePerimeterAngle + 270f + (360f / notchCount) * notchNumber
+        repeat(NOTCH_COUNT) { notchNumber ->
+            val circlePerimeterAngle = 270f + (360f / NOTCH_COUNT) * notchNumber
 
             val rectLength =
                 if (notchNumber.isDivisible(hourInterval))
-                    hourLength
+                    PRIMARY_NOTCH_LENGTH
                 else
-                    minuteLength
+                    SECONDARY_NOTCH_LENGTH
 
-            val rectColor = if (notchNumber.isDivisible(hourInterval))
-                hourColor
-            else
-                minuteColor
+            val rectColor =
+                if (notchNumber.isDivisible(hourInterval))
+                    PRIMARY_NOTCH_COLOR
+                else
+                    SECONDARY_NOTCH_COLOR
 
             rotate(
-                circlePerimeterAngleLocal + 90f,
+                circlePerimeterAngle + 90f,
                 pivot = Offset(
-                    centerX + circleRadius * cos(circlePerimeterAngleLocal.degreesToRadians()),
-                    centerY + circleRadius * sin(circlePerimeterAngleLocal.degreesToRadians())
+                    centerX + circleRadius * cos(circlePerimeterAngle.degreesToRadians()),
+                    centerY + circleRadius * sin(circlePerimeterAngle.degreesToRadians())
                 )
             ) {
                 drawRect(
                     color = rectColor,
                     topLeft = Offset(
-                        centerX + circleRadius * cos(circlePerimeterAngleLocal.degreesToRadians()),
-                        centerY + circleRadius * sin(circlePerimeterAngleLocal.degreesToRadians())
+                        centerX + circleRadius * cos(circlePerimeterAngle.degreesToRadians()),
+                        centerY + circleRadius * sin(circlePerimeterAngle.degreesToRadians())
                     ),
-                    size = Size(rotatingHandWidth / 2f, rectLength),
+                    size = Size(ROTATING_HAND_WIDTH / 2f, rectLength),
                 )
             }
 
             if (notchNumber.isDivisible(hourInterval)) {
                 val p1 =
-                    centerX + 0.8f * circleRadius * cos(circlePerimeterAngleLocal.degreesToRadians())
+                    centerX + 0.8f * circleRadius * cos(circlePerimeterAngle.degreesToRadians())
                 val p2 =
-                    centerY + 0.8f * circleRadius * sin(circlePerimeterAngleLocal.degreesToRadians())
+                    centerY + 0.8f * circleRadius * sin(circlePerimeterAngle.degreesToRadians())
 
                 val s = if (notchNumber == 0) "60"
                 else (notchNumber.div(hourInterval).times(5)).toString()
@@ -154,7 +145,7 @@ fun StopWatch(
 
         //timer text
         val tr = textMeasure.measure(
-            AnnotatedString(currentTimeLocal.toHms()),
+            AnnotatedString(currentTimeState.toHms()),
             style = TextStyle(
                 fontSize = 24.sp,
                 color = Colors.WHITE.value
@@ -170,7 +161,7 @@ fun StopWatch(
 
         //big rotating hand
         rotate(
-            currentTimeLocal.toRange0To360() + 270f,
+            currentTimeState.toRange0To360() + 270f,
             pivot = Offset(
                 centerX,
                 centerY
@@ -178,21 +169,24 @@ fun StopWatch(
         ) {
             drawRect(
                 color = Colors.YELLOW.value,
-                topLeft = Offset(centerX - rotatingHandExtension, centerY - rotatingHandWidth / 2),
-                size = Size(circleRadius + rotatingHandExtension, rotatingHandWidth),
+                topLeft = Offset(
+                    centerX - ROTATING_HAND_EXTENSION,
+                    centerY - ROTATING_HAND_WIDTH / 2
+                ),
+                size = Size(circleRadius + ROTATING_HAND_EXTENSION, ROTATING_HAND_WIDTH),
             )
         }
 
         //center stroke circle
         drawCircle(
             color = Colors.YELLOW.value,
-            radius = 10f,
+            radius = 14f,
             center = Offset(centerX, centerY),
-            style = Stroke(width = 4f)
+            style = Stroke(width = ROTATING_HAND_WIDTH)
         )
         drawCircle(
             Colors.BLACK.value,
-            radius = 8f,
+            radius = 10f,
             center = Offset(centerX, centerY)
         )
     }
@@ -205,7 +199,9 @@ fun GreetingPreview() {
     ComposePlaygroundTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             StopWatch(
-                modifier = Modifier.padding(innerPadding).clickable {  },
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .clickable { },
                 currentTime = MutableLiveData(10)
             )
         }

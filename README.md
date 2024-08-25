@@ -1,5 +1,5 @@
 ### Description
-Stopwatch UI component made using Jetpack Compose, inspired from iOS Clock UI. 
+>Stopwatch UI component made using Jetpack Compose, inspired from iOS Clock UI. 
 
-https://github.com/user-attachments/assets/8220eff6-ac6f-4622-ad1e-caaa73713488
-
+### GiF
+![compose-stopwatch](https://github.com/user-attachments/assets/54bc4fa4-690a-4d16-a6c5-690e2c9e5ebb)

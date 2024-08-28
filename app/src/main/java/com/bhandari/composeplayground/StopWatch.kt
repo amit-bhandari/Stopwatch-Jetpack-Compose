@@ -18,8 +18,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -78,13 +76,11 @@ fun StopWatch(
             .fillMaxSize()
             .background(Colors.BLACK.value)
             .padding(16.dp)
-            .onGloballyPositioned {
-                val bounds = it.boundsInWindow()
-                centerX = bounds.size.width / 2f
-                centerY = bounds.size.height / 2f
-                circleRadius = it.size.width.toFloat() / 2
-            }
     ) {
+        centerX = size.width / 2f
+        centerY = size.height / 2f
+        circleRadius = size.width / 2
+
         //notches on boundary of circle
         repeat(NOTCH_COUNT) { notchNumber ->
             val circlePerimeterAngle = 270f + (360f / NOTCH_COUNT) * notchNumber

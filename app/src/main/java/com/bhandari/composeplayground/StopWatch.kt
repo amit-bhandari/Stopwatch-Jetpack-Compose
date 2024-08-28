@@ -9,9 +9,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -58,16 +55,6 @@ fun StopWatch(
 ) {
     val currentTimeState by currentTime.observeAsState(0L)
 
-    var circleRadius by remember {
-        mutableFloatStateOf(0f)
-    }
-    var centerX by remember {
-        mutableFloatStateOf(0f)
-    }
-    var centerY by remember {
-        mutableFloatStateOf(0f)
-    }
-
     val textMeasure = rememberTextMeasurer()
     val hourInterval = NOTCH_COUNT / 12
 
@@ -77,9 +64,9 @@ fun StopWatch(
             .background(Colors.BLACK.value)
             .padding(16.dp)
     ) {
-        centerX = size.width / 2f
-        centerY = size.height / 2f
-        circleRadius = size.width / 2
+        val centerX = size.width / 2f
+        val centerY = size.height / 2f
+        val circleRadius = size.width / 2
 
         //notches on boundary of circle
         repeat(NOTCH_COUNT) { notchNumber ->
